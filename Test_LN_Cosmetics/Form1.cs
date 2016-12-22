@@ -21,7 +21,7 @@ namespace Test_LN_Cosmetics
             InitializeComponent();
         }
 
-        public List<Price> ReadFromExcel(OleDbConnection connection, out String err)
+        public List<Price> ReadFromExcel(OleDbConnection connection, out String err) //считываем данные из Ecxel
         {
             err = "";
             List<Price> res = new List<Price>();
@@ -101,7 +101,7 @@ namespace Test_LN_Cosmetics
             MessageBox.Show(err);
             em = "Ошибка в данных";
         }
-        public void CreateTextFile(string fName, List<Price> PriceList, out String err)
+        public void CreateTextFile(string fName, List<Price> PriceList, out String err) //формируем текстовый файл для прайс-листа
         {
             err = "";
             try
@@ -222,7 +222,7 @@ namespace Test_LN_Cosmetics
             label2.Visible = false;
         }
 
-         public static void SendToFTP (string ArchName, string FTPServerName)
+         public static void SendToFTP (string ArchName, string FTPServerName) //отправляем по ftp
         {
 
             FtpWebRequest request = (FtpWebRequest)WebRequest.Create(FTPServerName);
@@ -249,6 +249,280 @@ namespace Test_LN_Cosmetics
             
         }
 
+
+         public void CreateTextFile_EN(string fName, EN en, out String err) //формируем текстовый файл для электронной накладной
+         {
+             err = "";
+             try
+             {
+                 using (System.IO.StreamWriter file = new System.IO.StreamWriter(fName, true, Encoding.UTF8))
+                 {
+                     StringBuilder str = new StringBuilder();
+                     str.Append("{\"Номер\": ");
+                     str.Append(en.N.ToString());
+                     file.WriteLine(str.ToString());
+
+                     str = new StringBuilder();
+                     str.Append("\"Дата\": \"");
+                     str.Append(en.date.ToShortDateString());
+                     str.Append("\",");
+                     file.WriteLine(str.ToString());
+
+                     str = new StringBuilder();
+                     str.Append("\"ЗаказНомер\": \"");
+                     str.Append(en.orderNumber.ToString());
+                     str.Append("\",");
+                     file.WriteLine(str.ToString());
+
+                     str = new StringBuilder();
+                     str.Append("\"ЗаказДата\": \"");
+                     str.Append(en.orderDate.ToShortDateString());
+                     str.Append("\",");
+                     file.WriteLine(str.ToString());
+
+                     str = new StringBuilder();
+                     str.Append("\"ПоставщикИНН\": \"");
+                     str.Append(en.INN.ToString());
+                     str.Append("\",");
+                     file.WriteLine(str.ToString());
+
+                     str = new StringBuilder();
+                     str.Append("\"ПоставщикКПП\": \"");
+                     str.Append(en.KPP.ToString());
+                     str.Append("\",");
+                     file.WriteLine(str.ToString());
+
+                     str = new StringBuilder();
+                     str.Append("\"ПоставщикНаименование\": \"");
+                     str.Append(en.name.ToString());
+                     str.Append("\",");
+                     file.WriteLine(str.ToString());
+
+                     str = new StringBuilder();
+                     str.Append("\"ИтогоСуммаСНДС\": ");
+                     str.Append(en.ItogoSumma.ToString());
+                     str.Append(",");
+                     file.WriteLine(str.ToString());
+
+                     str = new StringBuilder();
+                     str.Append("\"Номенклатура\":[{");
+                     file.WriteLine(str.ToString());
+                     int i = 0;
+                     foreach (Nomenclatura_string item in en.list)
+                     {
+                         if (i > 0)
+                         {
+                             str = new StringBuilder();
+                             str.Append("},{");
+                             file.WriteLine(str.ToString());
+                         }
+                         //Код препарата
+                         str = new StringBuilder();
+                         str.Append("\"НоменклатураКод\": \"");
+                         str.Append(item.nomenclatura.ToString());
+                         str.Append("\",");
+                         file.WriteLine(str.ToString());
+
+                         //Название препарата
+                         str = new StringBuilder();
+                         str.Append("\"НоменклатураНаименование\": \"");
+                         str.Append(item.nomenclaturaName.ToString());
+                         str.Append("\",");
+                         file.WriteLine(str.ToString());
+
+                         //Производитель
+                         str = new StringBuilder();
+                         str.Append("\"ПроизводительНаименование\": \"");
+                         str.Append(item.proizvod.ToString());
+                         str.Append("\",");
+                         file.WriteLine(str.ToString());
+
+
+                         //Страна
+                         str = new StringBuilder();
+                         str.Append("\"НаименованиеСтраныПроизводителя\": \"");
+                         str.Append(item.strana.ToString());
+                         str.Append("\",");
+                         file.WriteLine(str.ToString());
+
+                         //СКол-во товара на складе поставщика
+                         str = new StringBuilder();
+                         str.Append("\"Количество\": ");
+                         str.Append(item.kol.ToString());
+                         str.Append(",");
+                         file.WriteLine(str.ToString());
+
+                         
+                         str = new StringBuilder();
+                         str.Append("\"ЦенаПоставкиСНДС\": \"");
+                         str.Append(item.cena.ToString());
+                         str.Append("\",");
+                         file.WriteLine(str.ToString());
+
+                        
+                         str = new StringBuilder();
+                         str.Append("\"СтавкаНДС\": ");
+                         str.Append(item.nds.ToString());
+                         str.Append(",");
+                         file.WriteLine(str.ToString());
+
+                        
+                         str = new StringBuilder();
+                         str.Append("\"ЖНВЛПЦенаПроизводителяБезНДС\": ");
+                         str.Append(item.jnvl_cena.ToString());
+                         str.Append(",");
+                         file.WriteLine(str.ToString());
+
+                         str = new StringBuilder();
+                         str.Append("\"НомеГТД\": \"");
+                         str.Append(item.N_GTD.ToString());
+                         str.Append("\",");
+                         file.WriteLine(str.ToString());
+
+                         str = new StringBuilder();
+                         str.Append("\"Сертификаты\":[");
+                         file.WriteLine(str.ToString());
+                         int j = 0;
+                         foreach (Sertificat_string s_item in item.sert_list)
+                         {
+                             if (j > 0)
+                             {
+                                 str = new StringBuilder();
+                                 str.Append("},{");
+                                 file.WriteLine(str.ToString());
+                             } 
+                         
+                         str = new StringBuilder();
+                         str.Append("\"СертификатСерия\": \"");
+                         str.Append(s_item.sert_seriya.ToString());
+                         str.Append("\",");
+                         file.WriteLine(str.ToString());
+
+                         str = new StringBuilder();
+                         str.Append("\"СертификатВид\": \"");
+                         str.Append(s_item.sert_vid.ToString());
+                         str.Append("\",");
+                         file.WriteLine(str.ToString());
+
+                         str = new StringBuilder();
+                         str.Append("\"СертификатРегистрационныйНомер\": \"");
+                         str.Append(s_item.sert_reg_n.ToString());
+                         str.Append("\",");
+                         file.WriteLine(str.ToString());
+
+                         str = new StringBuilder();
+                         str.Append("\"СертификатДатаВыдачи\": \"");
+                         str.Append(s_item.date_vyd.ToString());
+                         str.Append("\",");
+                         file.WriteLine(str.ToString());
+
+                         str = new StringBuilder();
+                         str.Append("\"СертификатСрокСертификата\": \"");
+                         str.Append(s_item.sert_srok.ToString());
+                         str.Append("\",");
+                         file.WriteLine(str.ToString());
+                         j += 1;
+                         }
+
+                         str = new StringBuilder();
+                         str.Append("}]");
+                         file.WriteLine(str.ToString());
+
+                         str = new StringBuilder();
+                         str.Append("\"Серии\":[");
+                         file.WriteLine(str.ToString());
+                         int l = 0;
+
+                         foreach (Seriya_string s_item in item.seriya_list)
+                         {
+                              if (l > 0)
+                             {
+                                 str = new StringBuilder();
+                                 str.Append("},{");
+                                 file.WriteLine(str.ToString());
+                             }
+
+                              str = new StringBuilder();
+                              str.Append("\"ЛПСерия\": \"");
+                              str.Append(s_item.LP_seriya.ToString());
+                              str.Append("\",");
+                              file.WriteLine(str.ToString());
+
+                              str = new StringBuilder();
+                              str.Append("\"КоличествоСерия\": ");
+                              str.Append(s_item.seriya_kol.ToString());
+                              str.Append(",");
+                              file.WriteLine(str.ToString());
+
+                              str = new StringBuilder();
+                              str.Append("\"ДатаВыпускаПрепарата\": \"");
+                              str.Append(s_item.datePrep.ToString());
+                              str.Append("\",");
+                              file.WriteLine(str.ToString());
+
+                              str = new StringBuilder();
+                              str.Append("\"ДатаИстеканияСрокаГодности\": \"");
+                              str.Append(s_item.srok.ToString());
+                              str.Append("\",");
+                              file.WriteLine(str.ToString());
+                              l += 1;
+                         }
+
+                         str = new StringBuilder();
+                         str.Append("}]");
+                         file.WriteLine(str.ToString());
+
+                         str = new StringBuilder();
+                         str.Append("\"ШтрихКодПроизводителя\": \"");
+                         str.Append(item.shtrih_kod.ToString());
+                         str.Append("\",");
+                         file.WriteLine(str.ToString());
+
+                         str = new StringBuilder();
+                         str.Append("\"ДатаРегистрацииЛПВВГосРеестре\": \"");
+                         str.Append(item.date_reg.ToShortDateString());
+                         str.Append("\",");
+                         file.WriteLine(str.ToString());
+
+                         str = new StringBuilder();
+                         str.Append("\"ЖНВЛПРеестроваяЦена\": ");
+                         str.Append(item.jnvl_reestr_cena.ToString());
+                         str.Append(",");
+                         file.WriteLine(str.ToString());
+
+                         str = new StringBuilder();
+                         str.Append("\"ЖНВЛПРеестроваяЦена\": ");
+                         str.Append(item.jnvl_reestr_cena.ToString());
+                         str.Append(",");
+                         file.WriteLine(str.ToString());
+
+                         str = new StringBuilder();
+                         str.Append("\"ИтогоПоСтроке\": ");
+                         str.Append(item.Itogo_string.ToString());
+                         str.Append(",");
+                         file.WriteLine(str.ToString());
+
+                         str = new StringBuilder();
+                         str.Append("\"ЖНВЛП\": ");
+                         str.Append(item.jnvl.ToString());
+                         str.Append(",");
+                         file.WriteLine(str.ToString());
+                         
+                         i += 1;
+
+                     }
+
+                     str = new StringBuilder();
+                     str.Append("}]}");
+                     file.WriteLine(str.ToString());
+                 }
+             }
+             catch (Exception e)
+             {
+                 err = e.Message;
+                 return;
+             }
+         }
         private void button1_Click(object sender, EventArgs e)
         {
            
