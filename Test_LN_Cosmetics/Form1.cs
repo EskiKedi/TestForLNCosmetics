@@ -526,8 +526,9 @@ namespace Test_LN_Cosmetics
         private void button1_Click(object sender, EventArgs e)
         {
            
-           
+           //Находим файл с прайс-листом
             string SourseFilePath = System.IO.Path.Combine(Application.StartupPath, "test.xls");
+            //Устанавливаем соединение с Excel
             OleDbConnection connection = new OleDbConnection(@"provider=Microsoft.Jet.OLEDB.4.0;Data Source='" + SourseFilePath + "';Extended Properties=Excel 8.0;");
             try
             {
@@ -539,35 +540,38 @@ namespace Test_LN_Cosmetics
                 return;
             }
             String err = "";
+            //Считываем данные прайс-листа
             List<Price> priceList = ReadFromExcel(connection, out err);
 
-           if (String.IsNullOrEmpty(err) == false)
+           if (String.IsNullOrEmpty(err) == false) //если были ошибки, пишем сообщение и прекращаем работу программы
            {
                MessageBox.Show("Ошибка при чтении прайс-листа! " + err);
                return;
            }
+            //задаем путь к файлу, куда будем сохранять файл
             string path = Application.StartupPath + @"\temp";
             System.IO.Directory.CreateDirectory(path);
             DateTime todayDate = DateTime.Today;
             string date_string = todayDate.Day.ToString() + todayDate.Month.ToString() + todayDate.Year.ToString();
-            string FilePath = path + @"\LNКосметика + " + date_string + ".txt";
+            string FilePath = path + @"\LNКосметика_" + date_string + ".txt";
            
-
+            //Создаем текстовый файл с прайсом
             CreateTextFile(FilePath, priceList, out err);
-            if (String.IsNullOrEmpty(err) == false)
+            if (String.IsNullOrEmpty(err) == false) //если не получилось - сообщение и прекращение работы
             {
                 MessageBox.Show("Ошибка при создании файла! " + err);
                 return;
             }
             try
             {
+               
                 string pathZip = Application.StartupPath + @"\temp_zip";
 
                 if (Directory.Exists(pathZip) == false) System.IO.Directory.CreateDirectory(pathZip);
 
-                string zipPath = pathZip + @"\LNКосметика + " + date_string + ".zip";
-                if (File.Exists(zipPath)) File.Delete(zipPath);
-
+                string zipPath = pathZip + @"\LNКосметика_" + date_string + ".zip";
+                if (File.Exists(zipPath)) File.Delete(zipPath); //если такой архив уже есть - удаляем его
+                //Пакуем в архив
                 ZipFile.CreateFromDirectory(path, zipPath);
                 if (Directory.Exists(path)) Directory.Delete(path, true);
 
@@ -585,6 +589,7 @@ namespace Test_LN_Cosmetics
                 {
                     try
                     {
+                        //Отправляем на ftp-сервер. Не тестировала!!!!! 
                         SendToFTP(zipPath, ftpText);
                     }
                     catch
