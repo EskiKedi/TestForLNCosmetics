@@ -38,16 +38,46 @@ namespace Test_LN_Cosmetics
                     j += 1;
                     if (j < 3) continue;
                     Price r = new Price();
-                    r.Cod = int.Parse(reader[0].ToString());
+                    int t = 0;
+                    decimal d = 0;
+                    Int64 t64 = 0;
+                    DateTime dt = DateTime.MinValue;
+                    if (int.TryParse(reader[0].ToString(), out t)) r.Cod=t;
+                    else
+                    {
+                        ErrMes("Ошибка в коде товара", out err);
+                        return res;
+                    }
                     r.Name = reader[1].ToString();
                     r.MNF = reader[2].ToString();
                     r.CNTR = reader[3].ToString();
-                    r.Srok = DateTime.Parse(reader[4].ToString());
-                    r.Kol = int.Parse(reader[5].ToString());
-                    r.Cena = decimal.Parse(reader[6].ToString());
-                    r.Kratnost = int.Parse(reader[7].ToString());
-                    r.Barcode = Int64.Parse(reader[8].ToString());
-                    r.Ratends = int.Parse(reader[9].ToString());
+                    if (DateTime.TryParse(reader[4].ToString(), out dt)) r.Srok = dt;
+                    else
+                    {
+                        ErrMes("Ошибка в дате срока годности", out err);
+                        return res;
+                    }
+                    t = 0;
+                    int.TryParse(reader[5].ToString(), out t);
+                    r.Kol = t;
+                    if (decimal.TryParse(reader[6].ToString(), out d)) r.Cena=d;
+                    else
+                    {
+                        ErrMes("Ошибка в цене товара", out err);
+                        return res;
+                    }
+                    t = 1;
+                    int.TryParse(reader[7].ToString(), out t); 
+                    r.Kratnost = t;
+                    if (Int64.TryParse(reader[8].ToString(), out t64)) r.Barcode = t64;
+                    else
+                    {
+                        ErrMes("Ошибка в коде", out err);
+                        return res;
+                    }
+                    t = 18;
+                    int.TryParse(reader[9].ToString(), out t);
+                    r.Ratends = t;
                     res.Add(r);
 
 
@@ -66,6 +96,11 @@ namespace Test_LN_Cosmetics
             return res;
         }
 
+        public void ErrMes(string err, out string em)
+        {
+            MessageBox.Show(err);
+            em = "Ошибка в данных";
+        }
         public void CreateTextFile(string fName, List<Price> PriceList, out String err)
         {
             err = "";
@@ -217,7 +252,7 @@ namespace Test_LN_Cosmetics
         private void button1_Click(object sender, EventArgs e)
         {
            
-           // string SourseFilePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "test.xls");
+           
             string SourseFilePath = System.IO.Path.Combine(Application.StartupPath, "test.xls");
             OleDbConnection connection = new OleDbConnection(@"provider=Microsoft.Jet.OLEDB.4.0;Data Source='" + SourseFilePath + "';Extended Properties=Excel 8.0;");
             try
@@ -241,7 +276,7 @@ namespace Test_LN_Cosmetics
             System.IO.Directory.CreateDirectory(path);
             DateTime todayDate = DateTime.Today;
             string date_string = todayDate.Day.ToString() + todayDate.Month.ToString() + todayDate.Year.ToString();
-            string FilePath = path + @"\ЛНКосметика + " + date_string + ".txt";
+            string FilePath = path + @"\LNКосметика + " + date_string + ".txt";
            
 
             CreateTextFile(FilePath, priceList, out err);
@@ -256,7 +291,7 @@ namespace Test_LN_Cosmetics
 
                 if (Directory.Exists(pathZip) == false) System.IO.Directory.CreateDirectory(pathZip);
 
-                string zipPath = pathZip + @"\price_arch.zip";
+                string zipPath = pathZip + @"\LNКосметика + " + date_string + ".zip";
                 if (File.Exists(zipPath)) File.Delete(zipPath);
 
                 ZipFile.CreateFromDirectory(path, zipPath);
